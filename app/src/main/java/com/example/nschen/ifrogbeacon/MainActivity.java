@@ -1,6 +1,8 @@
 package com.example.nschen.ifrogbeacon;
 
 
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
@@ -12,6 +14,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.icu.text.IDNA;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -74,6 +77,13 @@ public class MainActivity extends AppCompatActivity implements ifrog.ifrogCallBa
 
     private rowdata adapter;
 
+    /* 固定beacon */
+    String mac = "84:EB:18:7A:5B:80";
+
+    /* 通知的ID */
+    final static String GROUP_KEY_NEWS = "group_key_news";
+    int notificationId = 001;
+
     /* 藍芽 */
     final int REQUEST_ENABLE_BT = 18;
     private boolean firstOpen = true;
@@ -96,6 +106,7 @@ public class MainActivity extends AppCompatActivity implements ifrog.ifrogCallBa
         statusBT =  (ToggleButton) findViewById(R.id.status);
         statusBT.setOnCheckedChangeListener(this);//打開時負責檢查藍牙功能，有藍芽功能即要求開啟
         BTinit();
+        broadcastNotice();
     }//end onCreate
 
 
@@ -345,6 +356,24 @@ public class MainActivity extends AppCompatActivity implements ifrog.ifrogCallBa
         mifrog.BTSearchStop();
     }
 
+    public void broadcastNotice() {
+        NotificationCompat.Builder builder =
+                new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.drawable.compass)
+                        .setContentTitle("My notification")
+                        .setContentText("Hello World!");
+        // Creates an explicit intent for an Activity in your app
+        builder.setDefaults(0);
 
+        // 取得NotificationManager物件
+        NotificationManager manager = (NotificationManager)
+                getSystemService(Context.NOTIFICATION_SERVICE);
 
+        // 建立通知物件
+        Notification notification = builder.build();
+
+        // 使用設定的通知編號為編號發出通知
+        manager.notify(notificationId, notification);
+
+    }
 }
