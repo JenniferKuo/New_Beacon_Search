@@ -77,12 +77,9 @@ public class MainActivity extends AppCompatActivity implements ifrog.ifrogCallBa
 
     private rowdata adapter;
 
-    /* 固定beacon */
-    String mac = "84:EB:18:7A:5B:80";
-
     /* 通知的ID */
-    final static String GROUP_KEY_NEWS = "group_key_news";
     int notificationId = 001;
+    boolean isNotified = false;
 
     /* 藍芽 */
     final int REQUEST_ENABLE_BT = 18;
@@ -106,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements ifrog.ifrogCallBa
         statusBT =  (ToggleButton) findViewById(R.id.status);
         statusBT.setOnCheckedChangeListener(this);//打開時負責檢查藍牙功能，有藍芽功能即要求開啟
         BTinit();
-        broadcastNotice();
+
     }//end onCreate
 
 
@@ -216,14 +213,12 @@ public class MainActivity extends AppCompatActivity implements ifrog.ifrogCallBa
     /* appear my list */
     private void SetupList(){
         adapter=new rowdata(this,testValues,testValues2);//顯示的方式
-        listView1.setAdapter(adapter);        listView1.setOnItemClickListener(new AdapterView.OnItemClickListener(){ //選項按下反應
+        listView1.setAdapter(adapter);
+        listView1.setOnItemClickListener(new AdapterView.OnItemClickListener(){ //選項按下反應
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String item = testValues[position];      //哪一個列表
                 Toast.makeText(MainActivity.this, item + " selected", Toast.LENGTH_LONG).show(); //顯示訊號
-
-
-
 
                 /*換畫面 不換Activity*/
                 setContentView(R.layout.activity_search);
@@ -300,6 +295,13 @@ public class MainActivity extends AppCompatActivity implements ifrog.ifrogCallBa
     @Override
     public void BTSearchFindDevice(BluetoothDevice device, int rssi, byte[] scanRecord) {
         String t_address= device.getAddress();//有找到裝置的話先抓Address
+        /* 固定beacon */
+        String mac_address = "84:EB:18:7A:5B:80";
+//        Toast.makeText(getBaseContext(),t_address, Toast.LENGTH_SHORT).show();
+        if (t_address.equals(mac_address) && !isNotified) {
+            broadcastNotice(device.getName(), "記得去跑步");
+            isNotified = true;
+        }
         int index=0;
         boolean t_NewDevice=true;
         for(int i=0;i<Address.size();i++){
@@ -356,12 +358,13 @@ public class MainActivity extends AppCompatActivity implements ifrog.ifrogCallBa
         mifrog.BTSearchStop();
     }
 
-    public void broadcastNotice() {
+    public void broadcastNotice(String title, String content) {
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.compass)
-                        .setContentTitle("My notification")
-                        .setContentText("Hello World!");
+                        .setContentTitle(title)
+                        .setContentText(content)
+                        .setDefaults(Notification.DEFAULT_VIBRATE);
         // Creates an explicit intent for an Activity in your app
         builder.setDefaults(0);
 
