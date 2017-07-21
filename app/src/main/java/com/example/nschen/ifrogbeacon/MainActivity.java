@@ -18,10 +18,12 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
 import android.widget.AdapterView;
 import android.widget.CompoundButton;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -84,6 +86,9 @@ public class MainActivity extends AppCompatActivity implements ifrog.ifrogCallBa
     /* 藍芽 */
     final int REQUEST_ENABLE_BT = 18;
     private boolean firstOpen = true;
+
+    /* 儲存所有Beacon裝置的陣列 */
+    ArrayList<Beacon> beaconArray = new ArrayList<Beacon>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -222,8 +227,13 @@ public class MainActivity extends AppCompatActivity implements ifrog.ifrogCallBa
 
                 /*換畫面 不換Activity*/
                 setContentView(R.layout.activity_search);
+//                getWindow().addContentView(getLayoutInflater().inflate(R.layout.activity_search, null),new FrameLayout.LayoutParams(
+//                        FrameLayout.LayoutParams.MATCH_PARENT,
+//                        FrameLayout.LayoutParams.WRAP_CONTENT ));
 
-
+//                View viewToRemove= findViewById(R.id.activity_search);
+//                if (viewToRemove != null && (ViewGroup) viewToRemove.getParent() != null && viewToRemove instanceof ViewGroup)
+//                    ((ViewGroup) viewToRemove.getParent()).removeView(viewToRemove);
 
                 /* infomation on the second page*/
                 deviceInfo = (TextView) findViewById(R.id.beaconinfo);
@@ -378,5 +388,23 @@ public class MainActivity extends AppCompatActivity implements ifrog.ifrogCallBa
         // 使用設定的通知編號為編號發出通知
         manager.notify(notificationId, notification);
 
+    }
+
+    public Beacon deviceToBeacon(Beacon beacon, BluetoothDevice device) {
+        beacon.macAddress = device.getAddress();
+        beacon.bName = device.getName();
+        return beacon;
+    }
+
+    public void addBeacon() {
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent backPressedIntent = new Intent();
+        backPressedIntent .setClass(getApplicationContext(), MainActivity.class);
+        startActivity(backPressedIntent );
+        finish();
     }
 }
