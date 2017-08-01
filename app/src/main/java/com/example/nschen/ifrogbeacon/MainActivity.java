@@ -17,6 +17,7 @@ import android.icu.text.IDNA;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -86,6 +87,9 @@ public class MainActivity extends AppCompatActivity implements ifrog.ifrogCallBa
     /* 藍芽 */
     final int REQUEST_ENABLE_BT = 18;
     private boolean firstOpen = true;
+
+    /* 目前beacon所在的陣列位置 */
+    private int currentBeacon;
 
     /* 儲存所有Beacon裝置的陣列 */
     ArrayList<Beacon> beaconArray = new ArrayList<Beacon>();
@@ -181,7 +185,6 @@ public class MainActivity extends AppCompatActivity implements ifrog.ifrogCallBa
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-
         // get the angle around the z-axis rotated
         float degree = Math.round(event.values[0]);
 
@@ -200,9 +203,11 @@ public class MainActivity extends AppCompatActivity implements ifrog.ifrogCallBa
         // set the animation after the end of the reservation status
         ra.setFillAfter(true);
 
-        if(page == 2)
+        if(page == 2) {
             // Start the animation
             image.startAnimation(ra);
+        }
+
         currentDegree = -degree;
 
 
@@ -222,6 +227,7 @@ public class MainActivity extends AppCompatActivity implements ifrog.ifrogCallBa
         listView1.setOnItemClickListener(new AdapterView.OnItemClickListener(){ //選項按下反應
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                currentBeacon = position;
                 String item = testValues[position];      //哪一個列表
                 Toast.makeText(MainActivity.this, item + " selected", Toast.LENGTH_LONG).show(); //顯示訊號
 
@@ -239,6 +245,8 @@ public class MainActivity extends AppCompatActivity implements ifrog.ifrogCallBa
                 deviceInfo = (TextView) findViewById(R.id.beaconinfo);
                 String itemlist = testValues3[position];
                 deviceInfo.setText(itemlist);
+
+
                 page = 2;
 
 
@@ -307,7 +315,7 @@ public class MainActivity extends AppCompatActivity implements ifrog.ifrogCallBa
         String t_address= device.getAddress();//有找到裝置的話先抓Address
         /* 固定beacon */
         String mac_address = "84:EB:18:7A:5B:80";
-//        Toast.makeText(getBaseContext(),t_address, Toast.LENGTH_SHORT).show();
+
         if (t_address.equals(mac_address) && !isNotified) {
             broadcastNotice(device.getName(), "記得去跑步");
             isNotified = true;
@@ -323,7 +331,8 @@ public class MainActivity extends AppCompatActivity implements ifrog.ifrogCallBa
             }
         }
         if(device.getName() != null){
-            if(t_NewDevice==true){//如果是新的advice
+
+            if(t_NewDevice==true){//如果是新的device
                 Address.add(t_address);
                 //null can appear
                 Names.add(device.getName());//+" RSSI="+Integer.toString(rssi)+" d="+calculateDistance(rssi)+"cm"+" myD ="+Float.toString(turntoTarget));//抓名字然後放進列表
@@ -346,7 +355,18 @@ public class MainActivity extends AppCompatActivity implements ifrog.ifrogCallBa
                 );
                 testValues = Names.toArray(new String[Names.size()]);//放進array
                 testValues3 = Information.toArray(new String[Information.size()]);
+//                Log.d("beacon log",testValues3.toString());
+                int i;
+                for(i=0;i<testValues3.length;i++) {
+                    Toast.makeText(MainActivity.this, "i="+i+"\n"+testValues3[i], Toast.LENGTH_LONG).show();
+                }
+
             }
+        }
+//        Toast.makeText(MainActivity.this, testValues3[0], Toast.LENGTH_LONG).show();
+        if(page == 2) {
+            deviceInfo = (TextView) findViewById(R.id.beaconinfo);
+            deviceInfo.setText("rssi="+rssi+"\ndistance="+Double.toString(calculateDistance(rssi))+"cm");
         }
 
 
